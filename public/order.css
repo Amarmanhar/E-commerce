@@ -1,0 +1,35 @@
+.order {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 20px;
+    width: 70%;
+}
+
+.order-title {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.product-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.product-item {
+    border-bottom: 1px solid #ddd;
+    padding: 10px 0;
+}
+
+.product-name {
+    font-weight: bold;
+}
+
+.product-price {
+    color: #777;
+}
+
+.product-quantity {
+    color: #555;
+    font-style: italic;
+}

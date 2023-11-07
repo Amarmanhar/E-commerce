@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../public/home.css">
+    <link rel="stylesheet" href="../public/cart.css">
+    <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"
+    integrity="sha512-uMtXmF28A2Ab/JJO2t/vYhlaa/3ahUOgj1Zf27M5rOo8/+fcTUVH0/E0ll68njmjrLqOBjXM3V9NiPFL5ywWPQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
+
+</head>
+<body>
+    <header>
+        <nav>
+            <ul class="navbar">
+                <li><a href="#">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="cart.html">Cart</a></li>
+                <li><a href="order.html">Order</a></li>
+                <li><a href="add-product.html">Add Product</a></li>
+                <li><a href="admin.html">Admin Product</a></li>
+            </ul>
+        </nav>
+    </header>
+
+
+    <main>
+        <h4>Cart</h4>
+        <div id="cart-items" class="product-container"></div>
+        <button class="order-now-button" onclick="placeOrder()">Order Now</button>
+    </main>
+
+
+    <script>
+       window.addEventListener('load', async(event)=>{
+          event.preventDefault();
+          const cartItems = document.getElementById('cart-items');
+            cartItems.innerHTML = '';
+
+          const response = await  axios.get('http://localhost:3000/shop/get-cartProducts');
+          let products = response.data;
+          
+          products.forEach(product => {
+            const productDiv = document.createElement('div');
+          //  productDiv.classList.add('product-item');
+            productDiv.innerHTML = `
+                <h5 class="product-name">${product.name}</h5>
+                <img src="${product.imagesUrls}" alt="${product.name}" class="product-image">
+                <p class="product-price">Price: $${product.price.toFixed(2)}</p>
+                <p class="product-quantity">Quantity: <input type="number" value="${product.quantity}" id="quantity" /></p>
+                <button class="update-button" onclick="updateQuantity('${product._id}')">Update Quantity</button>
+                <button class="remove-button" onclick="removeFromCart('${product._id}')">Remove from Cart</button>
+            `;
+            cartItems.appendChild(productDiv);
+
+          });
+       })
+
+       async function updateQuantity(productId){
+           
+        newQuantity = document.getElementById('quantity').valueAsNumber;
+
+        try{
+            await axios.put(`http://localhost:3000/shop/update-quantity/${productId}`, { quantity: newQuantity });
+
+           alert('Product quantity updated successfully');       
+           location.reload();
+
+        }catch(err){
+            console.log(err);
+        }
+          
+       }
+
+       async function removeFromCart(productId){
+
+        await axios.delete(`http://localhost:3000/shop/remove-from-cart/${productId}`);
+        alert('product removed from cart ');
+        location.reload();
+        
+       }
+
+          async function placeOrder() {
+        try {
+            await axios.post('http://localhost:3000/shop/place-order');
+            alert('Order placed successfully');
+            location.reload();
+        } catch (err) {
+            console.log(err);
+        }
+    }
+    </script>
+</body>
+</html>

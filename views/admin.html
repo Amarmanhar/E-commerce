@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../public/home.css">
+    <link rel="stylesheet" href="../public/admin.css">
+    <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"
+    integrity="sha512-uMtXmF28A2Ab/JJO2t/vYhlaa/3ahUOgj1Zf27M5rOo8/+fcTUVH0/E0ll68njmjrLqOBjXM3V9NiPFL5ywWPQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
+</head>
+<body>
+    <header>
+        <nav>
+            <ul class="navbar">
+                <li><a href="#">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="cart.html">Cart</a></li>
+                <li><a href="order.html">Order</a></li>
+                <li><a href="add-product.html">Add Product</a></li>
+                <li><a href="admin.html">Admin Product</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div id="product-details-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="close-modal">&times;</span>
+            <h4>Edit Product</h4>
+            <form id="edit-product-form">
+                <label for="product-name">Product Name:</label>
+                <input type="text" id="product-name" name="product-name" ><br>
+    
+                <label for="product-images">Product Images:</label>
+                <input type="text" id="product-images" name="product-images" ><br>
+    
+                <label for="product-price">Product Price:</label>
+                <input type="number" id="product-price" name="product-price" step="0.01" ><br>
+    
+                <label for="product-details">Product Details:</label>
+                <textarea id="product-details" name="product-details" rows="4"></textarea><br>
+                <button type="button" id="update-product-button">Update Product</button>
+            </form>
+        </div>
+    </div>
+
+    <main>
+        <h4>Admin Dashboard</h4>
+
+        <div id="product-list" class="product-container">
+
+        </div>
+    </main>
+
+    <script>
+
+        window.addEventListener('load', async(event)=>{
+            event.preventDefault();
+
+            const productList = document.getElementById('product-list');
+            productList.innerHTML += '';
+
+           const response = await axios.get('http://localhost:3000/admin/get-products');
+           const products = response.data;
+           products.forEach(product => {
+                    const productDiv = document.createElement('div');
+                   // productDiv.classList.add('product-container');
+                    productDiv.innerHTML = `
+                <h5 class="product-name">${product.name}</h5>
+                <p class="product-price">Price: $${product.price.toFixed(2)}</p>
+                <img src="${product.imagesUrls}" alt="${product.name}" class="product-image">
+                <p class="product-details">${product.details}</p>
+                <button onclick="editProduct('${product._id}')" class="edit-button">Edit</button>
+                <button onclick="deleteProduct('${product._id}')" class="delete-button">Delete</button>
+            `;
+                    productList.appendChild(productDiv);
+             });
+        });
+        
+
+        async function editProduct(productId){
+
+            const closeModalButton = document.getElementById('close-modal');
+            const productDetailsModal = document.getElementById('product-details-modal');
+           
+            const updateProductButton = document.getElementById('update-product-button');
+           
+            try {
+                const response = await axios.get(`http://localhost:3000/admin/get-product/${productId}`);
+                const productData = response.data;
+                productDetailsModal.style.display = 'block';
+
+                document.getElementById('product-name').value = productData.name;
+                document.getElementById('product-images').value = productData.imagesUrls.join(', '); // Join array of image URLs
+                document.getElementById('product-price').value = productData.price;
+                document.getElementById('product-details').value = productData.details;
+            } catch (error) {
+                console.error(error);
+                
+            }
+
+            closeModalButton.addEventListener('click', ()=>{
+                productDetailsModal.style.display = "none";
+            });
+
+            updateProductButton.addEventListener('click', async(event)=>{
+                event.preventDefault();
+                const updatedProduct = {
+                    name: document.getElementById('product-name').value,
+                    imagesUrls: document.getElementById('product-images').value.split(', ').map(url => url.trim()), // Split and trim to get an array
+                    price: parseFloat(document.getElementById('product-price').value),
+                    details: document.getElementById('product-details').value,
+                };
+
+                try{
+                    const response = await axios.put(`http://localhost:3000/admin/update-product/${productId}`, updatedProduct); 
+                    console.log('Product updated:', response.data);
+                    productDetailsModal.style.display = "none";
+                            if (response.status === 200) {
+                                alert('Product updated successfully');
+                            } else {
+                                alert('Failed to update product');
+                            }
+                }catch(err){
+                    console.log(err);
+                }
+            })
+
+        }
+
+        async function deleteProduct(productId){
+           
+            try {
+                const response = await axios.delete(`http://localhost:3000/admin/delete-product/${productId}`);
+                if (response.status === 200) {
+                    
+                    const productDiv = document.querySelector(`[data-product-id="${productId}"]`);
+                    if (productDiv) {
+                        productDiv.remove();
+                    }
+                    alert('Product deleted successfully');
+                } else {
+                    alert('Failed to delete product');
+                }
+            } catch (error) {
+                console.error(error);
+                alert('An error occurred while deleting the product');
+            }
+
+        }
+
+
+    </script>
+</body>
+</html>

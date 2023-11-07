@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script
+    src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.4.0/axios.min.js"
+    integrity="sha512-uMtXmF28A2Ab/JJO2t/vYhlaa/3ahUOgj1Zf27M5rOo8/+fcTUVH0/E0ll68njmjrLqOBjXM3V9NiPFL5ywWPQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  ></script>
+    <link rel="stylesheet" href="../public/home.css">
+    <link rel="stylesheet" href="../public/order.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <ul class="navbar">
+                <li><a href="#">Home</a></li>
+                <li><a href="products.html">Products</a></li>
+                <li><a href="cart.html">Cart</a></li>
+                <li><a href="order.html">Order</a></li>
+                <li><a href="add-product.html">Add Product</a></li>
+                <li><a href="admin.html">Admin Product</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <h1>your orders</h1>
+    <div id="order-list" class="order-list"></div>
+
+    <script>
+     
+     window.addEventListener('load', async(event)=>{
+        
+        event.preventDefault();
+        const response = await axios.get('http://localhost:3000/orders/get-orders');
+        console.log(response.data);
+
+        const orders = response.data;
+
+       
+        const orderList = document.getElementById('order-list');
+            orders.forEach((product, index) => {
+                const orderDiv = document.createElement('div');
+                orderDiv.classList.add('order');
+
+                orderDiv.innerHTML = `
+                    <h3 class="order-title">Order ${index + 1}</h3>
+                    <div class="product-list">
+                        <div class="product-item">
+                            <p class="product-name">${product.name}</p>
+                            <p class="product-price">Price: $${product.price.toFixed(2)}</p>
+                            <p class="product-quantity">Quantity: ${product.quantity}</p>
+                        </div>
+                    </div>
+                `;
+
+                orderList.appendChild(orderDiv);
+            });
+
+
+     })
+
+    </script>
+
+
+</body>
+</html>
